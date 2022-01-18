@@ -1,3 +1,4 @@
+import numpy as np
 class Plane:
     def get_plane(pcd):
         """Segments a plane in the point cloud using the RANSAC algorithm."""
@@ -19,4 +20,4 @@ class Plane:
                 plane.append([x, y, z])
                 rotated_plane.append([-z, y, x])
         
-        return plane, rotated_plane
+        return np.array(plane), np.array(rotated_plane)
