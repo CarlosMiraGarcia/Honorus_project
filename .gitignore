@@ -1,2 +1,3 @@
 others/test
-_pycache__
+__pycache__/
+
