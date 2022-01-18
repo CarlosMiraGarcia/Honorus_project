@@ -1,5 +1,5 @@
 others/test
-stem/__pycache__/*
-angle/__pycache__/*
-plane/__pycache__/*
-camera/__pycache__/*
+stem/__pycache__/
+angle/__pycache__/
+plane/__pycache__/
+camera/__pycache__/
