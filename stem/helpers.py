@@ -1,4 +1,5 @@
-def read_lines(filename, list):
+def read_lines(filename):
+    list = []
     with open(filename, 'r') as file_to_read:
         while True:
             lines = file_to_read.readline()
