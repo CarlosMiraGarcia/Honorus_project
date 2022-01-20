@@ -57,11 +57,15 @@ def run(filename):
     print("Initial array size: ", array_points_nofloor.size)
     print("Array size after cropping: ", array_points_leaves.size)
     
-    # Save point cloud as pcd
+    # Saves point cloud as pcd
     Point_cloud.save_as_pcd(savefilename, point_cloud_leaves)
     
-    #o3d.visualization.draw_geometries([point_cloud_nofloor])
-    o3d.visualization.draw_geometries([point_cloud_leaves])
+    # Segmentates the leaves into clusters and colours them, returning a list with point clouds for each leaf
+    leaf_point_cloud = Point_cloud.leaves_segmentation(point_cloud_leaves)
+    
+    # Displays each leaf point cloud
+    for i in range (len(leaf_point_cloud)):
+        o3d.visualization.draw_geometries([Point_cloud.array_to_point_cloud(leaf_point_cloud[i])])
     
     # Calculates execution time for the program
     end = time.time()
@@ -70,5 +74,5 @@ def run(filename):
     
 if __name__ ==  '__main__':
     #filename = sys.argv[1]
-    filename = "others/test/6.xyz"
+    filename = "others/test/5.xyz"
     run(filename)
