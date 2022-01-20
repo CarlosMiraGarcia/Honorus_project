@@ -9,7 +9,7 @@ class Plane:
         print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
         return plane_model
     
-    def append_plane_to_pcd(a1, b1, c1, d1):
+    def create_planes(a1, b1, c1, d1):
         plane = []
         rotated_plane = []
         for i in range(0, 300):
