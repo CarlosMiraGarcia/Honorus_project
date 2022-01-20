@@ -11,4 +11,6 @@ class Angle:
         e2 = math.sqrt(a2 * a2 + b2 * b2 + c2 * c2)
         temp = temp / (e1 * e2)
         angle = math.degrees(math.acos(temp))
+
         print(f'The angle is {angle} degrees')
+        print("")
