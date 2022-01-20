@@ -4,17 +4,23 @@ from plane.plane import Plane
 from point_cloud.point_cloud import Point_cloud
 import open3d as o3d
 import time
+import numpy as np
 
 def run(filename):
-    # records the starting time when the script was run
+    # Variables
+    index = 0
+    kept = 0
+    list_points_kept = []
+    diff_adj = 5
+    # Records the starting time when the script was run
     start = time.time()
     
-    # creates a new name for the file to be saved based on the original name of the file
+    # Creates a new name for the file to be saved based on the original name of the file
     savefilename = filename[:-4] + '_plane' + '.pcd'
-    # reads the point cloud from the filename
+    # Reads the point cloud from the filename
     pc_raw = o3d.io.read_point_cloud(filename)
        
-    # removes outliers and returns the inliners and index 
+    # Removes outliers and returns the inliners and index 
     pc_inliners, ind = Point_cloud.remove_outliers(pc_raw)
     pc_cleaned = pc_inliners.select_by_index(ind)
 
@@ -23,40 +29,45 @@ def run(filename):
     # Finds the segment plane equation for the floor
     floor_a, floor_b, floor_c, floor_d = Plane.get_plane(pc_cleaned)
 
-    # Returns two point clouds: floor and stem
+    # Returns two numpy arrays: floor and stem
     floor, stem = Stem.create_stem(pc_cleaned, floor_a, floor_b, floor_c, floor_d)
     
-    # Finds the segment plane equation for the stem
-    stem_a, stem_b, stem_c, stem_d = Plane.get_plane(stem)
-    
-    # list_points = np.asarray(pc_cleaned.points)
-    
-    # index = 0
-    # deleted = 0
-    # list_points_kepts = []
-    # print(list_points.size)
-    # for line in list_points:
-    #     if stem_a * line[0] + stem_b * line[1] + (-stem_c * line[2]) + stem_d < 100:
-    #         list_points_kepts.append(list_points)
-    #         deleted += 1        
-    #         index -= 1
-    #         #print(line)
-    #     index += 1
-        
-    # print(list_points.size)
-    # print("Deleted: ", deleted, " points")  
-    
-    # pcd = o3d.geometry.PointCloud()
-    # pcd.points = o3d.utility.Vector3dVector(list_points)
-    # o3d.visualization.draw_geometries([pcd])
+    # Inserts planes into original point cloud
+    #np_array_cleaned = Point_cloud.read_lines(pc_cleaned)
+    #np_array_cleaned = Point_cloud.append_points_to_array(floor, np_array_cleaned)
+    #np_array_cleaned = Point_cloud.append_points_to_array(stem, np_array_cleaned)  
+    #pc_cleaned = Point_cloud.array_to_point_cloud(np_array_cleaned)
 
-    # save point cloud as pcd
-    Point_cloud.save_as_pcd(savefilename, pc_cleaned)
+    #o3d.visualization.draw_geometries([pc_cleaned])
     
-    # calculate angles
+    # Finds the segment plane equation for the stem
+    stem_pc = Point_cloud.array_to_point_cloud(stem)
+    stem_a, stem_b, stem_c, stem_d = Plane.get_plane(stem_pc)
+    
+    # Removes everything under plane
+    list_points = np.asarray(pc_cleaned.points)    
+
+    print("Initial array size: ", list_points.size)
+    for line in list_points:
+        if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) > - floor_d + diff_adj:
+            list_points_kept.append(line)
+            kept += 1        
+            index -= 1
+        index += 1
+        
+    array_points_kept = np.asarray(list_points_kept)
+    print("Array size after cropping: ", array_points_kept.size)
+    
+    point_cloud_kept = Point_cloud.array_to_point_cloud(array_points_kept)
+    o3d.visualization.draw_geometries([point_cloud_kept])
+
+    # Save point cloud as pcd
+    Point_cloud.save_as_pcd(savefilename, point_cloud_kept)
+    
+    # Calculate angles
     Angle.calculate_angles(floor_a, floor_b, floor_c, stem_a, stem_b, stem_c)
     
-    # calculates execution time for the program
+    # Calculates execution time for the program
     end = time.time()
     print("Execution time:", end - start)
     
