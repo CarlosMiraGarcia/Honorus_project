@@ -1,5 +1,6 @@
 import open3d as o3d
 import numpy as np
+import matplotlib.pyplot as plt
 
 class Point_cloud:
     def remove_outliers(pcd):
@@ -33,3 +34,23 @@ class Point_cloud:
                 list_points_kept.append(line)
             
         return list_points_kept
+    
+    def leaves_segmentation(pcd):
+        # Uses DBSCAN [Ester1996]
+        # http://www.open3d.org/docs/latest/tutorial/Basic/pointcloud.html
+
+        labels = np.array(pcd.cluster_dbscan(eps=2, min_points=30, print_progress=True)) # creates a label por each of the points depending on the cluster they are in,
+                                                                                             # with a -1 for whatever is considered noise
+
+        max_label = labels.max()
+        print(f"point cloud has {max_label + 1} clusters")
+        colors = plt.get_cmap("viridis")(labels / (max_label if max_label > 0 else 1)) # selects a colour based on the assigned label using the palette viridis
+        colors[labels < 0] = 0 # If the cluster is too small (noise), set the colour to black
+        pcd.colors = o3d.utility.Vector3dVector(colors[:, :3])
+        o3d.visualization.draw_geometries([pcd])
+        
+        out_pc = []
+        for label in range (max_label + 1):
+            out_pc.append(np.asarray(pcd.points)[labels == label])
+                   
+        return out_pc
