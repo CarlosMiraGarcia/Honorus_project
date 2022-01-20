@@ -8,9 +8,8 @@ import numpy as np
 
 def run(filename):
     # Variables
-    index = 0
-    kept = 0
-    list_points_kept = []
+    list_points_nofloor = []
+    list_points_leaves = []
     diff_adj = 5
     # Records the starting time when the script was run
     start = time.time()
@@ -44,28 +43,41 @@ def run(filename):
     stem_pc = Point_cloud.array_to_point_cloud(stem)
     stem_a, stem_b, stem_c, stem_d = Plane.get_plane(stem_pc)
     
-    # Removes everything under plane
-    list_points = np.asarray(pc_cleaned.points)    
-
-    print("Initial array size: ", list_points.size)
-    for line in list_points:
-        if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) > - floor_d + diff_adj:
-            list_points_kept.append(line)
-            kept += 1        
-            index -= 1
-        index += 1
-        
-    array_points_kept = np.asarray(list_points_kept)
-    print("Array size after cropping: ", array_points_kept.size)
-    
-    point_cloud_kept = Point_cloud.array_to_point_cloud(array_points_kept)
-    o3d.visualization.draw_geometries([point_cloud_kept])
-
-    # Save point cloud as pcd
-    Point_cloud.save_as_pcd(savefilename, point_cloud_kept)
-    
     # Calculate angles
     Angle.calculate_angles(floor_a, floor_b, floor_c, stem_a, stem_b, stem_c)
+    
+    # Removes everything under floor plane
+    list_points = np.asarray(pc_cleaned.points)    
+    print("Initial array size: ", list_points.size)
+    
+    for line in list_points:
+        if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) > - floor_d + diff_adj:
+            list_points_nofloor.append(line)    
+    
+    array_points_kept = np.asarray(list_points_nofloor)
+    print("Array size after cropping: ", array_points_kept.size)
+    point_cloud_nofloor = Point_cloud.array_to_point_cloud(array_points_kept)    
+    floor_a, floor_b, floor_c, floor_d = Plane.get_plane(point_cloud_nofloor)
+    
+    # Removes ??
+    list_points_nofloor = np.asarray(point_cloud_nofloor.points) 
+
+    for line in list_points_nofloor:
+        if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) > - floor_d + diff_adj:
+            list_points_leaves.append(line)
+    
+    
+    array_points_leaves = np.asarray(list_points_leaves)
+    point_cloud_leaves = Point_cloud.array_to_point_cloud(array_points_leaves)
+
+    # Save point cloud as pcd
+    Point_cloud.save_as_pcd(savefilename, point_cloud_leaves)
+    
+    o3d.visualization.draw_geometries([point_cloud_nofloor])
+    o3d.visualization.draw_geometries([point_cloud_leaves])
+
+
+
     
     # Calculates execution time for the program
     end = time.time()
@@ -73,5 +85,5 @@ def run(filename):
     
 if __name__ ==  '__main__':
     #filename = sys.argv[1]
-    filename = "others/test/5.ply"
+    filename = "others/test/6.xyz"
     run(filename)
