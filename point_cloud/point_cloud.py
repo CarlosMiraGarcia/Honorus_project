@@ -23,3 +23,13 @@ class Point_cloud:
     def append_points_to_array(npa1, npa2):
         npa = np.vstack((npa1, npa2))
         return npa
+
+    def crop_using_plane(list_points, floor_a, floor_b, floor_c, floor_d):
+        diff_adj = 5
+        list_points_kept = []
+        
+        for line in list_points:
+            if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) > - floor_d + diff_adj:
+                list_points_kept.append(line)
+            
+        return list_points_kept
