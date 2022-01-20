@@ -2,7 +2,7 @@ import numpy as np
 class Plane:
     def get_plane(pcd):
         """Segments a plane in the point cloud using the RANSAC algorithm."""
-        plane_model, inliers = pcd.segment_plane(distance_threshold= 0.005,
+        plane_model, inliers = pcd.segment_plane(distance_threshold= 0.5,
                                                  ransac_n=3,
                                                  num_iterations=1000)
         [a,b,c,d] = plane_model
