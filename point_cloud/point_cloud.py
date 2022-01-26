@@ -29,10 +29,16 @@ class Point_cloud:
         diff_adj = 5
         list_points_kept = []
         
-        for line in list_points:
-            if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) > - floor_d + diff_adj:
-                list_points_kept.append(line)
-            
+        if floor_a * floor_b * floor_c < 0:
+            for line in list_points:
+                if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) >= - floor_d + diff_adj:
+                    list_points_kept.append(line)     
+                       
+        else:
+            for line in list_points:
+                if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) <= - floor_d - diff_adj:
+                    list_points_kept.append(line)        
+
         return list_points_kept
     
     def leaves_segmentation(pcd):
