@@ -29,7 +29,7 @@ def run(filename):
     Point_cloud.save_as_pcd(savefilename_folder_path + 'cleaned.pcd', pc_cleaned)
 
 
-    # Finds the segment plane equation for the floorw
+    # Finds the segment plane equation for the floor
     floor_plane_a, floor_plane_b, floor_plane_c, floor_plane_d = Plane.get_plane(pc_cleaned)
 
     # Returns two numpy arrays: floor and stem
@@ -38,6 +38,7 @@ def run(filename):
     ##### Temp ######
     # Add planes to point cloud 
     array_with_floor = Point_cloud.append_points_to_array(list_points, floor)
+    array_with_stem = Point_cloud.append_points_to_array(list_points, stem)
     pc_with_floor = Point_cloud.array_to_point_cloud(array_with_floor)
     #o3d.visualization.draw_geometries([pc_with_floor])
     Point_cloud.save_as_pcd(savefilename_folder_path + 'floor_plane.pcd', pc_with_floor)
@@ -97,5 +98,5 @@ def run(filename):
     
 if __name__ ==  '__main__':
     #filename = sys.argv[1]
-    filename = "others/test/5.xyz"
+    filename = "others/test/1.pcd"
     run(filename)
