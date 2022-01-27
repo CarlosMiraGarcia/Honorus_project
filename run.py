@@ -91,6 +91,15 @@ def run(filename):
         #o3d.visualization.draw_geometries([Point_cloud.array_to_point_cloud(leaf_point_cloud[i])])
         Point_cloud.save_as_pcd(savefilename_folder_path + 'leaf_' + str(i + 1) + '.pcd', Point_cloud.array_to_point_cloud(leaf_data_points_list[i]))
     
+    # Calculates all the leaf angles
+    leaves = []
+    for i in os.listdir(savefilename_folder_path):
+        if os.path.isfile(os.path.join(savefilename_folder_path,i)) and 'leaf_' in i:
+            leaves.append(savefilename_folder_path + i)
+    
+    for leaf in leaves:
+        Angle.calculate_leaf_angle(leaf)
+    
     # Calculates execution time for the program
     end = time.time()
     print("")
