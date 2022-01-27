@@ -10,11 +10,11 @@ class Plane:
         [a,b,c,d] = plane_model
         print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
         
-        #inlier_cloud = pcd.select_by_index(inliers)
-        #inlier_cloud.paint_uniform_color([1.0, 0, 0])
-        #outlier_cloud = pcd.select_by_index(inliers, invert=True)
+        inlier_cloud = pcd.select_by_index(inliers)
+        inlier_cloud.paint_uniform_color([1.0, 0, 0])
+        outlier_cloud = pcd.select_by_index(inliers, invert=True)
 
-        #o3d.visualization.draw_geometries([inlier_cloud, outlier_cloud])
+        o3d.visualization.draw_geometries([inlier_cloud, outlier_cloud])
         return plane_model
     
     def create_planes(a1, b1, c1, d1):
