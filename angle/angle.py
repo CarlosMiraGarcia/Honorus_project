@@ -42,9 +42,9 @@ class Angle:
         print(f'"\033[4mCalculating angle {filename}\033[0m"')
 
         line_np = np.asarray(pc_leaf.points)
-        floor_plane_a, floor_plane_b, floor_plane_c, floor_plane_d = Plane.get_plane(Point_cloud.array_to_point_cloud(line_np))
-        #diff =  101.12 / floor_plane_d
-        angle = Angle.calculate_angles(0.60, 0.01, 0.80, floor_plane_a, floor_plane_b, floor_plane_c)
+        leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d = Plane.get_plane(Point_cloud.array_to_point_cloud(line_np))
+        #diff =  101.12 / leaf_plane_d
+        angle = Angle.calculate_angles(0.60, 0.01, 0.80, leaf_plane_a, leaf_plane_b, leaf_plane_c)
         list_angles.append(angle)
         list_sum += angle
 
