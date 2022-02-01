@@ -107,5 +107,5 @@ def run(filename):
     
 if __name__ ==  '__main__':
     #filename = sys.argv[1]
-    filename = "others/test/1.pcd"
+    filename = "others/test/13.ply"
     run(filename)
