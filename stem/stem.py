@@ -1,4 +1,3 @@
-import open3d as o3d
 from plane.plane import *
 from point_cloud.point_cloud import *
 
