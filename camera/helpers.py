@@ -1,5 +1,6 @@
 from ensenso_nxlib import NxLibCommand, NxLibException, NxLibItem
 from ensenso_nxlib.constants import *
+from ensenso_nxlib import *
 import os
 import numpy
 import open3d as o3d
@@ -17,13 +18,11 @@ def open_camera(camera_serial):
     print('Camera initialized')
     return
 
-
 def close_camera():
     # Closes all open cameras
     print('Closing camera...')
     NxLibCommand(CMD_CLOSE).execute()
     print('Camera closed')
-
 
 def set_camera_parameters(camera_serial, settings_path):
     # Updates the camera settings
@@ -31,10 +30,9 @@ def set_camera_parameters(camera_serial, settings_path):
     itm = NxLibItem()
     camera_node = itm[ITM_CAMERAS][camera_serial]
     camera_node << param
-    #itm[ITM_CAMERAS][camera_serial][ITM_PARAMETERS][ITM_CAPTURE][ITM_PROJECTOR] = True #Sets front light to false
-    #itm[ITM_CAMERAS][camera_serial][ITM_PARAMETERS][ITM_CAPTURE][ITM_FRONT_LIGHT] = True #Sets front light to false
+    itm[ITM_CAMERAS][camera_serial][ITM_PARAMETERS][ITM_CAPTURE][ITM_PROJECTOR] = True 
+    itm[ITM_CAMERAS][camera_serial][ITM_PARAMETERS][ITM_CAPTURE][ITM_FRONT_LIGHT] = True 
     print('Settings updated')
-
 
 def capture_img(camera_serial):
     # Captures with the previous openend camera
@@ -48,7 +46,6 @@ def capture_img(camera_serial):
         return
     print('Image captured')
 
-
 def rectify_raw_img():
     # Rectify the the captures raw images
     rectification = NxLibCommand(CMD_RECTIFY_IMAGES)
@@ -58,7 +55,6 @@ def rectify_raw_img():
         if e.get_error_code() == NXLIB_ITEM_INEXISTENT:
             print(e.get_error_text())
             print(rectification.result().as_json_meta())
-
 
 def compute_disparity():
     # Compute the disparity map
@@ -112,14 +108,23 @@ def create_point_map(camera_serial):
     print('Point map created')
     return points
      
-def save_point_cloud(points, path, file_name):
+def save_point_cloud(points, normals, points_plus_normals, path, file_name):
     point_cloud = o3d.geometry.PointCloud()
     point_cloud.points = o3d.utility.Vector3dVector(points)  
+    point_cloud.normals = o3d.utility.Vector3dVector(normals)
+
     # Save as xyz file
     with open(path + file_name + '.xyz', 'wb') as f:
-        numpy.savetxt(f, points, delimiter = ' ', newline='\n', header='', footer='', fmt='%1.3f')
-    # Save as pcl file
+        numpy.savetxt(f, points_plus_normals, delimiter = ' ', newline='\n', header='', footer='', fmt='%1.3f')
+    
+    # Save as pcl file    
     o3d.io.write_point_cloud(path + file_name + '.pcd', point_cloud, write_ascii=True, compressed=False, print_progress=False)
+
+def compute_normals(camera_serial):
+    normals = NxLibCommand(CMD_COMPUTE_NORMALS)
+    normals.execute()
+    normals = NxLibItem()[ITM_CAMERAS][camera_serial][ITM_IMAGES][ITM_NORMALS].get_binary_data()
+    return normals
 
 def save_ply(path, file_name, camera_serial):
     save = NxLibCommand(CMD_SAVE_MODEL)
