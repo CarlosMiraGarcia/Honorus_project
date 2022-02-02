@@ -20,7 +20,7 @@ class Angle:
         print("")
         return angle
     
-    def calculate_leaf_angle(filename):
+    def calculate_leaf_angle(stem_plane_a, stem_plane_b, stem_plane_c, filename):
         pc_leaf = o3d.io.read_point_cloud(filename)
         # pc_leaf.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.01, max_nn=10))
 
@@ -36,17 +36,12 @@ class Angle:
         #     print(line)
 
         # Calculate angles
-        list_angles = []
-        list_sum = 0
         print("")
         print(f'"\033[4mCalculating angle {filename}\033[0m"')
 
-        line_np = np.asarray(pc_leaf.points)
-        leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d = Plane.get_plane(Point_cloud.array_to_point_cloud(line_np))
-        #diff =  101.12 / leaf_plane_d
-        angle = Angle.calculate_angles(0.60, 0.01, 0.80, leaf_plane_a, leaf_plane_b, leaf_plane_c)
-        list_angles.append(angle)
-        list_sum += angle
+        line_np_points = np.asarray(pc_leaf.points)
+        line_np_normals = np.asarray(pc_leaf.normals)
+        
+        leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d = Plane.get_plane(Point_cloud.array_to_point_cloud_with_normals(line_np_points, line_np_normals))
 
-        avg = list_sum / len(list_angles)
-        print(90 - avg)
+        Angle.calculate_angles(stem_plane_a, stem_plane_b, stem_plane_c, leaf_plane_a, leaf_plane_b, leaf_plane_c)
