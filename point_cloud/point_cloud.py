@@ -14,6 +14,12 @@ class Point_cloud:
         pcd.points = o3d.utility.Vector3dVector(pc_array)
         return pcd
     
+    def array_to_point_cloud_with_normals(pc_array_points, pc_array_normals):
+            pcd = o3d.geometry.PointCloud()
+            pcd.points = o3d.utility.Vector3dVector(pc_array_points)
+            pcd.normals = o3d.utility.Vector3dVector(pc_array_normals)
+            return pcd
+        
     def save_as_pcd(savefilename, point_cloud):
         o3d.io.write_point_cloud(savefilename, point_cloud, write_ascii=True, compressed=True)
         
@@ -56,8 +62,11 @@ class Point_cloud:
         
         # o3d.visualization.draw_geometries([pcd]) # Displays the leaves coloured depending on their label
         
-        out_pc = []
+        out_pc_points = []
+        out_pc_normals = []
+        
         for label in range (max_label + 1):
-            out_pc.append(np.asarray(pcd.points)[labels == label])
+            out_pc_points.append(np.asarray(pcd.points)[labels == label])
+            out_pc_normals.append(np.asarray(pcd.normals)[labels == label])            
                    
-        return out_pc
+        return out_pc_points, out_pc_normals
