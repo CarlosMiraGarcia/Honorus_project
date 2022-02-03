@@ -2,7 +2,6 @@
 from camera.camera import Camera
 from angle.angle import Angle
 from point_cloud.point_cloud import Point_cloud
-from stem.stem import Stem
 from plane.plane import Plane
 import open3d as o3d
 import time
@@ -11,9 +10,6 @@ import os
 import sys
 
 def run(filename):
-    # Variables
-    list_points_nofloor = []
-    list_points_leaves = []
     # Records the starting time when the script was run
     start = time.time()
     
@@ -29,36 +25,35 @@ def run(filename):
     pc_inliners, ind = Point_cloud.remove_outliers(pc_raw)
     pc_cleaned = pc_inliners.select_by_index(ind)
     list_points = np.asarray(np.concatenate([pc_cleaned.points, pc_cleaned.normals], axis= 1))
-
     Point_cloud.save_as_pcd(savefilename_folder_path + 'cleaned.pcd', pc_cleaned)
 
-
     # Finds the segment plane equation for the floor
-    floor_plane_a, floor_plane_b, floor_plane_c, floor_plane_d = Plane.get_plane(pc_cleaned)
-
+    floor_plane_a, floor_plane_b, floor_plane_c, floor_plane_d = Plane.get_plane(pc_cleaned, 0.5)
+    
+    # ##### Temp ######
     # Returns two numpy arrays: floor and stem
-    floor, stem = Stem.create_stem(pc_cleaned, floor_plane_a, floor_plane_b, floor_plane_c, floor_plane_d)
-    
-    ##### Temp ######
-    # Add planes to point cloud 
-    #array_with_floor = Point_cloud.append_points_to_array(list_points, floor)
-    #array_with_stem = Point_cloud.append_points_to_array(list_points, stem)
-    #pc_with_floor = Point_cloud.array_to_point_cloud(array_with_floor)
-    #Point_cloud.save_as_pcd(savefilename_folder_path + 'floor_plane.pcd', pc_with_floor)
+    #floor, stem = Stem.create_stem(floor_plane_a, floor_plane_b, floor_plane_c, floor_plane_d)
+    # # Add planes to point cloud 
+    # array_with_floor_points, array_with_floor_normals = np.hsplit(list_points, 2)
 
-    #array_with_stem = Point_cloud.append_points_to_array(array_with_floor, stem)
-    #pc_with_stem = Point_cloud.array_to_point_cloud(array_with_stem)
-    #Point_cloud.save_as_pcd(savefilename_folder_path + 'stem_plane.pcd', pc_with_stem)
-    ##### Temp ######
+    # array_with_floor = Point_cloud.append_points_to_array(array_with_floor_points, floor)
+    # array_with_stem = Point_cloud.append_points_to_array(array_with_floor_points, stem)
+    # pc_with_floor = Point_cloud.array_to_point_cloud(array_with_floor)
+    # Point_cloud.save_as_pcd(savefilename_folder_path + 'floor_plane.pcd', pc_with_floor)
 
-    # Finds the segment plane equation for the stem
-    stem_pc = Point_cloud.array_to_point_cloud(stem)
-    stem_plane_a, stem_plane_b, stem_plane_c, stem_plane_d = Plane.get_plane(stem_pc)
+    # array_with_stem = Point_cloud.append_points_to_array(array_with_floor, stem)
+    # pc_with_stem = Point_cloud.array_to_point_cloud(array_with_stem)
+    # Point_cloud.save_as_pcd(savefilename_folder_path + 'stem_plane.pcd', pc_with_stem)
+    # ##### Temp ######
+
+    # # Finds the segment plane equation for the stem
+    # stem_pc = Point_cloud.array_to_point_cloud(stem)
+    # stem_plane_a, stem_plane_b, stem_plane_c, stem_plane_d = Plane.get_plane(stem_pc, 0.5)
     
-    # Calculate angles
-    print("")
-    print("\033[4mCalculating angle\033[0m")
-    Angle.calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, stem_plane_a, stem_plane_b, stem_plane_c)
+    # # Calculate angles
+    # print("")
+    # print("\033[4mCalculating angle\033[0m")
+    # Angle.calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, stem_plane_a, stem_plane_b, stem_plane_c)
     
     # Removes everything under floor plane
     print("\033[4mRemoving floor from point cloud\033[0m")
@@ -75,9 +70,9 @@ def run(filename):
     
     # Removes everything under crops' tray
     print("\033[4mRemoving tray from point cloud\033[0m")
-    tray_plane_a, tray_plane_b, tray_plane_c, tray_plane_d = Plane.get_plane(point_cloud_nofloor)
-    list_points_leaves = Point_cloud.crop_using_plane(array_points_nofloor, tray_plane_a, tray_plane_b, tray_plane_c, tray_plane_d)
-    array_points_leaves = np.asarray(list_points_nofloor)
+    tray_plane_a, tray_plane_b, tray_plane_c, tray_plane_d = Plane.get_plane(point_cloud_nofloor, 0.8)
+    list_points_no_tray = Point_cloud.crop_using_plane(array_points_nofloor, tray_plane_a, tray_plane_b, tray_plane_c, tray_plane_d)
+    array_points_leaves = np.asarray(list_points_no_tray)
     array_points_leaves_points, array_points_leaves_normals = np.hsplit(array_points_leaves, 2)
     point_cloud_leaves = Point_cloud.array_to_point_cloud_with_normals(array_points_leaves_points, array_points_leaves_normals)    
     print("Initial array size: ", array_points_nofloor.size)
@@ -97,10 +92,10 @@ def run(filename):
     leaves = []
     for i in os.listdir(savefilename_folder_path):
         if os.path.isfile(os.path.join(savefilename_folder_path,i)) and 'leaf_' in i:
-            leaves.append(savefilename_folder_path + i)
-    
+            leaves.append(savefilename_folder_path + i)    
+
     for leaf in leaves:
-        Angle.calculate_leaf_angle(stem_plane_a, stem_plane_b, stem_plane_c, leaf)
+        Angle.calculate_leaf_angle(floor_plane_a, floor_plane_b, floor_plane_c, leaf)
     
     # Calculates execution time for the program
     end = time.time()
@@ -109,5 +104,5 @@ def run(filename):
     
 if __name__ ==  '__main__':
     #filename = sys.argv[1]
-    filename = "others/test/16.pcd"
-    run(filename)
+    filename = "others/test/17.pcd"
+    run(filename)           
