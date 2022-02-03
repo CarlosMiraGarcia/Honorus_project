@@ -3,6 +3,7 @@ import open3d as o3d
 import numpy as np
 from plane.plane import Plane
 from point_cloud.point_cloud import Point_cloud
+import statistics
 
 class Angle:
     def calculate_angles(a1, b1, c1, a2, b2, c2):
@@ -16,25 +17,12 @@ class Angle:
         temp = temp / (e1 * e2)
         angle = math.degrees(math.acos(temp))
 
-        print(f'The angle is {angle} degrees')
-        print("")
+        #print(f'The angle is {angle} degrees')
+        #print("")
         return angle
     
-    def calculate_leaf_angle(stem_plane_a, stem_plane_b, stem_plane_c, filename):
+    def calculate_leaf_angle(floor_plane_a, floor_plane_b, floor_plane_c, filename):
         pc_leaf = o3d.io.read_point_cloud(filename)
-        # pc_leaf.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.01, max_nn=10))
-
-        # distances = pc_leaf.compute_nearest_neighbor_distance()
-        # avg_dist = np.mean(distances)
-        # radius = 1.5 * avg_dist   
-        # mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting(
-        #        pc_leaf,
-        #        o3d.utility.DoubleVector([radius, radius * 2]))
-
-        # np_triangles = np.asanyarray(mesh.triangles)
-        # for line in np_triangles:
-        #     print(line)
-
         # Calculate angles
         print("")
         print(f'"\033[4mCalculating angle {filename}\033[0m"')
@@ -42,6 +30,18 @@ class Angle:
         line_np_points = np.asarray(pc_leaf.points)
         line_np_normals = np.asarray(pc_leaf.normals)
         
-        leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d = Plane.get_plane(Point_cloud.array_to_point_cloud_with_normals(line_np_points, line_np_normals))
+        leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d = Plane.get_plane(pc_leaf, 1)
+        
+        list_angle = []
+        for normal in line_np_normals:
+                list_angle.append(Angle.calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, normal[0], normal[1], normal[2]))
+        
+        
+        plane = Plane.create_plane(line_np_points, leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d)
+        
+        array_with_plane = Point_cloud.append_points_to_array(line_np_points, plane)
+        pc_with_plane = Point_cloud.array_to_point_cloud(array_with_plane)
+        o3d.visualization.draw_geometries([pc_with_plane])
+        print("Using normals", 90 - statistics.mean(list_angle))
 
-        Angle.calculate_angles(stem_plane_a, stem_plane_b, stem_plane_c, leaf_plane_a, leaf_plane_b, leaf_plane_c)
+        print("Using planes", 90 - Angle.calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, leaf_plane_a, leaf_plane_b, leaf_plane_c))
