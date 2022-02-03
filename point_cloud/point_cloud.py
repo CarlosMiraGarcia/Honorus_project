@@ -59,9 +59,7 @@ class Point_cloud:
         colors = plt.get_cmap("viridis")(labels / (max_label if max_label > 0 else 1)) # selects a colour based on the assigned label using the palette viridis
         colors[labels < 0] = 0 # If the cluster is too small (noise), set the colour to black
         pcd.colors = o3d.utility.Vector3dVector(colors[:, :3])
-        
-        # o3d.visualization.draw_geometries([pcd]) # Displays the leaves coloured depending on their label
-        
+                
         out_pc_points = []
         out_pc_normals = []
         
