@@ -1,4 +1,3 @@
-
 from camera.camera import Camera
 from angle.angle import Angle
 from point_cloud.point_cloud import Point_cloud
@@ -22,14 +21,11 @@ def run(filename):
     pc_raw = o3d.io.read_point_cloud(filename)
        
     # Removes outliers and returns the inliners and index 
-    pc_inliners, ind = Point_cloud.remove_outliers(pc_raw)
+    pc_inliners, ind = Point_cloud.remove_outliers(pc_raw, 20)
     pc_cleaned = pc_inliners.select_by_index(ind)
     list_points = np.asarray(np.concatenate([pc_cleaned.points, pc_cleaned.normals], axis= 1))
     Point_cloud.save_as_pcd(savefilename_folder_path + 'cleaned.pcd', pc_cleaned)
-
-    # Finds the segment plane equation for the floor
-    floor_plane_a, floor_plane_b, floor_plane_c, floor_plane_d = Plane.get_plane(pc_cleaned, 0.5)
-    
+   
     # ##### Temp ######
     # Returns two numpy arrays: floor and stem
     #floor, stem = Stem.create_stem(floor_plane_a, floor_plane_b, floor_plane_c, floor_plane_d)
@@ -57,32 +53,31 @@ def run(filename):
     
     # Removes everything under floor plane
     print("\033[4mRemoving floor from point cloud\033[0m")
+    # Finds the segment plane equation for the floor
+    floor_plane_a, floor_plane_b, floor_plane_c, floor_plane_d = Plane.get_plane(pc_cleaned, 0.5, 1000)
     list_points_nofloor = Point_cloud.crop_using_plane(list_points, floor_plane_a, floor_plane_b, floor_plane_c, floor_plane_d)
     array_points_nofloor = np.asarray(list_points_nofloor)
     array_points_nofloor_points, array_points_nofloor_normals = np.hsplit(array_points_nofloor, 2)
     point_cloud_nofloor = Point_cloud.array_to_point_cloud_with_normals(array_points_nofloor_points, array_points_nofloor_normals) 
     ##### Temp ######
     Point_cloud.save_as_pcd(savefilename_folder_path + 'floor_removed.pcd', point_cloud_nofloor)
-    ##### Temp ######
-    print("Initial array size: ", list_points.size)
-    print("Array size after cropping: ", array_points_nofloor.size)
-    print("")
-    
+
     # Removes everything under crops' tray
     print("\033[4mRemoving tray from point cloud\033[0m")
-    tray_plane_a, tray_plane_b, tray_plane_c, tray_plane_d = Plane.get_plane(point_cloud_nofloor, 0.8)
+    tray_plane_a, tray_plane_b, tray_plane_c, tray_plane_d = Plane.get_plane(point_cloud_nofloor, 0.05, 3000)
     list_points_no_tray = Point_cloud.crop_using_plane(array_points_nofloor, tray_plane_a, tray_plane_b, tray_plane_c, tray_plane_d)
     array_points_leaves = np.asarray(list_points_no_tray)
     array_points_leaves_points, array_points_leaves_normals = np.hsplit(array_points_leaves, 2)
     point_cloud_leaves = Point_cloud.array_to_point_cloud_with_normals(array_points_leaves_points, array_points_leaves_normals)    
-    print("Initial array size: ", array_points_nofloor.size)
-    print("Array size after cropping: ", array_points_leaves.size)
+    
+    pc_inliners, ind = Point_cloud.remove_outliers(point_cloud_leaves, 200)
+    point_cloud_leaves_cleaned = pc_inliners.select_by_index(ind)
     
     # Saves point cloud as pcd
-    Point_cloud.save_as_pcd(savefilename_folder_path + 'leaves.pcd', point_cloud_leaves)
+    Point_cloud.save_as_pcd(savefilename_folder_path + 'leaves.pcd', point_cloud_leaves_cleaned)    
     
     # Segmentates the leaves into clusters and colours them, returning a list with point clouds for each leaf
-    leaf_data_points_list_points, leaf_data_points_list_normals = Point_cloud.leaves_segmentation(point_cloud_leaves)  
+    leaf_data_points_list_points, leaf_data_points_list_normals = Point_cloud.leaves_segmentation(point_cloud_leaves_cleaned)  
     
     # Displays each leaf point cloud
     for i in range (len(leaf_data_points_list_points)):
@@ -104,5 +99,5 @@ def run(filename):
     
 if __name__ ==  '__main__':
     #filename = sys.argv[1]
-    filename = "others/test/17.pcd"
+    filename = "others/test/1.pcd"
     run(filename)           
