@@ -30,18 +30,17 @@ class Angle:
         line_np_points = np.asarray(pc_leaf.points)
         line_np_normals = np.asarray(pc_leaf.normals)
         
-        leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d = Plane.get_plane(pc_leaf, 1)
+        leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d = Plane.get_plane(pc_leaf, 50, 1000)
         
         list_angle = []
         for normal in line_np_normals:
                 list_angle.append(Angle.calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, normal[0], normal[1], normal[2]))
         
         
-        plane = Plane.create_plane(line_np_points, leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d)
-        
-        array_with_plane = Point_cloud.append_points_to_array(line_np_points, plane)
-        pc_with_plane = Point_cloud.array_to_point_cloud(array_with_plane)
-        o3d.visualization.draw_geometries([pc_with_plane])
-        print("Using normals", 90 - statistics.mean(list_angle))
+        #plane = Plane.create_plane(line_np_points, leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d)        
+        #array_with_plane = Point_cloud.append_points_to_array(line_np_points, plane)
+        #pc_with_plane = Point_cloud.array_to_point_cloud(array_with_plane)
+        #o3d.visualization.draw_geometries([pc_with_plane])
+        print("Using normals", statistics.mean(list_angle) - 90)
 
-        print("Using planes", 90 - Angle.calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, leaf_plane_a, leaf_plane_b, leaf_plane_c))
+        print("Using planes", Angle.calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, leaf_plane_a, leaf_plane_b, leaf_plane_c) - 90)
