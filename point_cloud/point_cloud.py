@@ -3,9 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Point_cloud:
-    def remove_outliers(pcd):
+    def remove_outliers(pcd, neighbors):
         voxel_down_pcd = pcd.voxel_down_sample(voxel_size=0.000001)
-        cl, ind = voxel_down_pcd.remove_statistical_outlier(nb_neighbors=20,
+        cl, ind = voxel_down_pcd.remove_statistical_outlier(nb_neighbors=neighbors,
                                                     std_ratio=2.0)
         return voxel_down_pcd, ind
     
@@ -22,11 +22,7 @@ class Point_cloud:
         
     def save_as_pcd(savefilename, point_cloud):
         o3d.io.write_point_cloud(savefilename, point_cloud, write_ascii=True, compressed=True)
-        
-    def read_lines(point_cloud):    
-        list = np.asarray(point_cloud.points)
-        return list
-            
+           
     def append_points_to_array(npa1, npa2):
         npa = np.vstack((npa1, npa2))
         return npa
@@ -51,7 +47,7 @@ class Point_cloud:
         # Uses DBSCAN [Ester1996]
         # http://www.open3d.org/docs/latest/tutorial/Basic/pointcloud.html
 
-        labels = np.array(pcd.cluster_dbscan(eps=2, min_points=30, print_progress=True)) # creates a label por each of the points depending on the cluster they are in,
+        labels = np.array(pcd.cluster_dbscan(eps=4, min_points=200, print_progress=True)) # creates a label por each of the points depending on the cluster they are in,
                                                                                              # with a -1 for whatever is considered noise
 
         max_label = labels.max()
@@ -59,7 +55,9 @@ class Point_cloud:
         colors = plt.get_cmap("viridis")(labels / (max_label if max_label > 0 else 1)) # selects a colour based on the assigned label using the palette viridis
         colors[labels < 0] = 0 # If the cluster is too small (noise), set the colour to black
         pcd.colors = o3d.utility.Vector3dVector(colors[:, :3])
-                
+        
+        print("Remember to display the leaves with different colours for the dissertation!")
+        print("This can be done on the leaves_segmentation module")        
         out_pc_points = []
         out_pc_normals = []
         
