@@ -1,6 +1,5 @@
 from ensenso_nxlib import NxLibCommand, NxLibException, NxLibItem
 from ensenso_nxlib.constants import *
-from ensenso_nxlib import *
 import os
 import numpy
 import open3d as o3d
@@ -10,18 +9,25 @@ def open_camera(camera_serial):
     print('Initializing camera...')
     cmd = NxLibCommand(CMD_OPEN)
     cmd.parameters()[ITM_CAMERAS] = camera_serial
-    cmd.execute()
-    if not cmd.successful():
-        print(cmd.result()[ITM_ERROR_TEXT])
+    try:
+        cmd.execute()
+    except NxLibException as e:
+        print(e.get_error_text())
+        print(cmd.result().as_json_meta())
         print('If you called the getPointCloud end point recently (less than 10 seconds), wait 10 seconds and try again')
         return
     print('Camera initialized')
-    return
 
 def close_camera():
     # Closes all open cameras
     print('Closing camera...')
-    NxLibCommand(CMD_CLOSE).execute()
+    close = NxLibCommand(CMD_CLOSE)
+    try:
+        close.execute()
+    except NxLibException as e:
+        print(e.get_error_text())
+        print(close.result().as_json_meta())
+        return    
     print('Camera closed')
 
 def set_camera_parameters(camera_serial, settings_path):
@@ -39,8 +45,10 @@ def capture_img(camera_serial):
     print('Capturing image...')
     capture = NxLibCommand(CMD_CAPTURE)
     capture.parameters()[ITM_CAMERAS] = camera_serial
-    capture.execute()
-    if not capture.successful():
+    try:
+        capture.execute()
+    except NxLibException as e:
+        print(e.get_error_code())
         print(capture.result()[ITM_ERROR_TEXT])
         print('If you called the getPointCloud end point recently (less than 10 seconds), wait 10 seconds and try again')
         return
@@ -103,8 +111,13 @@ def create_point_map(camera_serial):
     # Compute the point map from the disparity map
     print('Creating point map...')
     point_map = NxLibCommand(CMD_COMPUTE_POINT_MAP)
-    point_map.execute()
-    points = NxLibItem()[ITM_CAMERAS][camera_serial][ITM_IMAGES][ITM_POINT_MAP].get_binary_data()
+    try:
+        point_map.execute()
+        points = NxLibItem()[ITM_CAMERAS][camera_serial][ITM_IMAGES][ITM_POINT_MAP].get_binary_data()
+    except NxLibException as e:
+        print(e.get_error_text())
+        print(point_map.result().as_json_meta())
+        return    
     print('Point map created')
     return points
      
@@ -122,19 +135,20 @@ def save_point_cloud(points, normals, points_plus_normals, path, file_name):
 
 def compute_normals(camera_serial):
     normals = NxLibCommand(CMD_COMPUTE_NORMALS)
-    normals.execute()
-    normals = NxLibItem()[ITM_CAMERAS][camera_serial][ITM_IMAGES][ITM_NORMALS].get_binary_data()
+    try:
+        normals.execute()
+        normals = NxLibItem()[ITM_CAMERAS][camera_serial][ITM_IMAGES][ITM_NORMALS].get_binary_data()
+    except NxLibException as e:
+        print(e.get_error_text())
+        print(normals.result().as_json_meta())
+        return
     return normals
 
-def save_ply(path, file_name, camera_serial):
+def save_ply(path, file_name):
     save = NxLibCommand(CMD_SAVE_MODEL)
-    save.parameters()[ITM_CAMERA] = camera_serial
+    save.parameters()
     save.parameters()[ITM_FILENAME] = path + file_name + '.ply'
-    try:
-        save.execute()
-    except NxLibException as e:
-        print(e.get_error_code())
-        print(e.get_error_text())
+    save.execute()
 
 def save_img(path, file_name, camera_serial):
     # Get the item node of the openend camera
@@ -145,12 +159,17 @@ def save_img(path, file_name, camera_serial):
     save_img_cmd.parameters()[ITM_NODE] = camera[ITM_IMAGES][ITM_RECTIFIED][ITM_LEFT].path
     save_img_cmd.parameters()[ITM_FILENAME] = path + file_name + '_left.png'
     save_img_cmd.execute()  
+
     save_img_cmd.parameters()[ITM_NODE] = camera[ITM_IMAGES][ITM_RECTIFIED][ITM_RIGHT].path
     save_img_cmd.parameters()[ITM_FILENAME] = path + file_name + '_right.png'
-    save_img_cmd.execute()
-    return 
+    save_img_cmd.execute()  
 
 def recalibrate(camera_serial):
     recalibrate_camera = NxLibCommand(CMD_RECALIBRATE)
     recalibrate_camera.parameters()[ITM_CAMERAS] = camera_serial
-    recalibrate_camera.execute()
+    try:
+        recalibrate_camera.execute()  
+    except NxLibException as e:
+        print(e.get_error_code())
+        print(recalibrate_camera.result().as_json_meta())
+        return
