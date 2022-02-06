@@ -3,11 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Point_cloud:
-    def remove_outliers(pcd, neighbors):
-        voxel_down_pcd = pcd.voxel_down_sample(voxel_size=0.000001)
-        cl, ind = voxel_down_pcd.remove_statistical_outlier(nb_neighbors=neighbors,
-                                                    std_ratio=2.0)
-        return voxel_down_pcd, ind
+    def remove_outliers(pcd, neighbors, ratio):
+        cl, ind = pcd.remove_statistical_outlier(nb_neighbors=neighbors,
+                                                    std_ratio=ratio)
+        return pcd, ind
     
     def array_to_point_cloud(pc_array):
         pcd = o3d.geometry.PointCloud()
@@ -21,7 +20,7 @@ class Point_cloud:
             return pcd
         
     def save_as_pcd(savefilename, point_cloud):
-        o3d.io.write_point_cloud(savefilename, point_cloud, write_ascii=True, compressed=True)
+        o3d.io.write_point_cloud(savefilename, point_cloud, write_ascii=False, compressed=True)
            
     def append_points_to_array(npa1, npa2):
         npa = np.vstack((npa1, npa2))
@@ -43,11 +42,11 @@ class Point_cloud:
 
         return list_points_kept
     
-    def leaves_segmentation(point_cloud):
+    def leaves_segmentation(point_cloud, eps_value, min_points_value):
         # Uses DBSCAN [Ester1996]
         # http://www.open3d.org/docs/latest/tutorial/Basic/pointcloud.html
 
-        labels = np.array(point_cloud.cluster_dbscan(eps=4, min_points=200, print_progress=True)) # creates a label por each of the points depending on the cluster they are in,
+        labels = np.array(point_cloud.cluster_dbscan(eps=eps_value, min_points=min_points_value, print_progress=True)) # creates a label por each of the points depending on the cluster they are in,
                                                                                              # with a -1 for whatever is considered noise
 
         max_label = labels.max()
