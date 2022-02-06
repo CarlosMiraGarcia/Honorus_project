@@ -21,7 +21,7 @@ def run(filename):
     pc_raw = o3d.io.read_point_cloud(filename)
        
     # Removes outliers and returns the inliners and index 
-    pc_inliners, ind = Point_cloud.remove_outliers(pc_raw, 20)
+    pc_inliners, ind = Point_cloud.remove_outliers(pc_raw, 20, 2)
     pc_cleaned = pc_inliners.select_by_index(ind)
     list_points = np.asarray(np.concatenate([pc_cleaned.points, pc_cleaned.normals], axis= 1))
     Point_cloud.save_as_pcd(savefilename_folder_path + 'cleaned.pcd', pc_cleaned)
@@ -64,20 +64,17 @@ def run(filename):
 
     # Removes everything under crops' tray
     print("\033[4mRemoving tray from point cloud\033[0m")
-    tray_plane_a, tray_plane_b, tray_plane_c, tray_plane_d = Plane.get_plane(point_cloud_nofloor, 0.05, 3000)
+    tray_plane_a, tray_plane_b, tray_plane_c, tray_plane_d = Plane.get_plane(point_cloud_nofloor, 0.5, 3000)
     list_points_no_tray = Point_cloud.crop_using_plane(array_points_nofloor, tray_plane_a, tray_plane_b, tray_plane_c, tray_plane_d)
     array_points_leaves = np.asarray(list_points_no_tray)
     array_points_leaves_points, array_points_leaves_normals = np.hsplit(array_points_leaves, 2)
     point_cloud_leaves = Point_cloud.array_to_point_cloud_with_normals(array_points_leaves_points, array_points_leaves_normals)    
-    
-    pc_inliners, ind = Point_cloud.remove_outliers(point_cloud_leaves, 200)
-    point_cloud_leaves_cleaned = pc_inliners.select_by_index(ind)
-    
+        
     # Saves point cloud as pcd
-    Point_cloud.save_as_pcd(savefilename_folder_path + 'leaves.pcd', point_cloud_leaves_cleaned)    
+    Point_cloud.save_as_pcd(savefilename_folder_path + 'leaves.pcd', point_cloud_leaves)    
     
     # Segmentates the leaves into clusters and colours them, returning a list with point clouds for each leaf
-    leaf_data_points_list_points, leaf_data_points_list_normals = Point_cloud.leaves_segmentation(point_cloud_leaves_cleaned)  
+    leaf_data_points_list_points, leaf_data_points_list_normals = Point_cloud.leaves_segmentation(point_cloud_leaves, 4, 400)  
     
     # Displays each leaf point cloud
     for i in range (len(leaf_data_points_list_points)):
@@ -99,5 +96,5 @@ def run(filename):
     
 if __name__ ==  '__main__':
     #filename = sys.argv[1]
-    filename = "others/test/1.pcd"
+    filename = "others/test/2.pcd"
     run(filename)           
