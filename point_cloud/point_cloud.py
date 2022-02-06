@@ -43,18 +43,18 @@ class Point_cloud:
 
         return list_points_kept
     
-    def leaves_segmentation(pcd):
+    def leaves_segmentation(point_cloud):
         # Uses DBSCAN [Ester1996]
         # http://www.open3d.org/docs/latest/tutorial/Basic/pointcloud.html
 
-        labels = np.array(pcd.cluster_dbscan(eps=4, min_points=200, print_progress=True)) # creates a label por each of the points depending on the cluster they are in,
+        labels = np.array(point_cloud.cluster_dbscan(eps=4, min_points=200, print_progress=True)) # creates a label por each of the points depending on the cluster they are in,
                                                                                              # with a -1 for whatever is considered noise
 
         max_label = labels.max()
         print(f"point cloud has {max_label + 1} clusters")
         colors = plt.get_cmap("viridis")(labels / (max_label if max_label > 0 else 1)) # selects a colour based on the assigned label using the palette viridis
         colors[labels < 0] = 0 # If the cluster is too small (noise), set the colour to black
-        pcd.colors = o3d.utility.Vector3dVector(colors[:, :3])
+        point_cloud.colors = o3d.utility.Vector3dVector(colors[:, :3])
         
         print("Remember to display the leaves with different colours for the dissertation!")
         print("This can be done on the leaves_segmentation module")        
@@ -62,7 +62,7 @@ class Point_cloud:
         out_pc_normals = []
         
         for label in range (max_label + 1):
-            out_pc_points.append(np.asarray(pcd.points)[labels == label])
-            out_pc_normals.append(np.asarray(pcd.normals)[labels == label])            
+            out_pc_points.append(np.asarray(point_cloud.points)[labels == label])
+            out_pc_normals.append(np.asarray(point_cloud.normals)[labels == label])            
                    
         return out_pc_points, out_pc_normals
