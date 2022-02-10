@@ -23,7 +23,7 @@ def close_camera():
     print('Closing camera...')
     close = NxLibCommand(CMD_CLOSE)
     try:
-        close.execute()
+        close.execute(wait=False)
     except NxLibException as e:
         print(e.get_error_text())
         print(close.result().as_json_meta())
@@ -36,8 +36,8 @@ def set_camera_parameters(camera_serial, settings_path):
     itm = NxLibItem()
     camera_node = itm[ITM_CAMERAS][camera_serial]
     camera_node << param
-    itm[ITM_CAMERAS][camera_serial][ITM_PARAMETERS][ITM_CAPTURE][ITM_PROJECTOR] = True 
-    itm[ITM_CAMERAS][camera_serial][ITM_PARAMETERS][ITM_CAPTURE][ITM_FRONT_LIGHT] = True 
+    #itm[ITM_CAMERAS][camera_serial][ITM_PARAMETERS][ITM_CAPTURE][ITM_PROJECTOR] = True 
+    #itm[ITM_CAMERAS][camera_serial][ITM_PARAMETERS][ITM_CAPTURE][ITM_FRONT_LIGHT] = True 
     print('Settings updated')
 
 def capture_img(camera_serial):
