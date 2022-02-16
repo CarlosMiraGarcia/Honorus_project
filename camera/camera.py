@@ -8,6 +8,7 @@ class Camera:
         self.settings_path = settings_path
         self.saving_filename = filename
         self.saving_path = create_path(saving_path, self.saving_filename)
+        self.saving_path_postprocessing = create_path(self.saving_path, 'post-processing')
 
     def get_point_cloud(self):      
         # Waits for the cameras to be initialized
@@ -35,7 +36,7 @@ class Camera:
         
         #Saves images from the camera
         save_img(self.saving_path, self.saving_filename, self.serial)
-        save_ply(self.saving_path, self.saving_filename)
+        #save_ply(self.saving_path, self.saving_filename)
         # Closes the camera
         close_camera()    
         return 'Images and point cloud files have been saved in the ' + self.saving_path + ' folder'
