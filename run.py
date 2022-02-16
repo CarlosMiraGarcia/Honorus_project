@@ -12,21 +12,26 @@ def run():
     # Records the starting time when the script was run
     start = time.time()
     file_name = str(datetime.datetime.now().strftime('%Y%m%dT%H%M')).split('.')[0]
-
+    plant_ID = file_name
+    
+    # Checks for JSON file, if it doesn't exist, creates one
+    json_file = "data.json"
+    if not os.path.exists(json_file):
+        with open(json_file, 'w') as f:
+            f.write('[]')
+            
     # Creates an instance of the class Camera and creates a point cloud
     camera = Camera('217617', './others/calibrations_and_patterns/parameters_28_01_22_patchmatch.json', 'test/', file_name)
     camera.get_point_cloud()
-    
+        
     # Reads the point cloud from the filename
-    #pc_raw_fullsize = o3d.io.read_point_cloud(filename)
-    #pc_raw = pc_raw_fullsize.voxel_down_sample(voxel_size=0.05)
     pc_raw = o3d.io.read_point_cloud(camera.saving_path + camera.saving_filename + ".pcd")
        
     # Removes outliers and returns the inliners and index 
     pc_inliners, ind = point_cloud_ops.remove_outliers(pc_raw, 20, 2)
     pc_cleaned = pc_inliners.select_by_index(ind)
     list_points = np.asarray(np.concatenate([pc_cleaned.points, pc_cleaned.normals], axis= 1))
-    point_cloud_ops.save_as_pcd(camera.saving_path + 'cleaned.pcd', pc_cleaned)
+    point_cloud_ops.save_as_pcd(camera.saving_path_postprocessing + 'cleaned.pcd', pc_cleaned)
      
     # Removes everything under floor plane
     print("\033[4mRemoving floor from point cloud\033[0m")
@@ -37,7 +42,7 @@ def run():
     array_points_nofloor_points, array_points_nofloor_normals = np.hsplit(array_points_nofloor, 2)
     point_cloud_nofloor = point_cloud_ops.array_to_point_cloud_with_normals(array_points_nofloor_points, array_points_nofloor_normals) 
     ##### Temp ######
-    point_cloud_ops.save_as_pcd(camera.saving_path + 'floor_removed.pcd', point_cloud_nofloor)
+    point_cloud_ops.save_as_pcd(camera.saving_path_postprocessing + 'floor_removed.pcd', point_cloud_nofloor)
 
     # Removes everything under crops' tray
     print("\033[4mRemoving tray from point cloud\033[0m")
@@ -48,24 +53,27 @@ def run():
     point_cloud_leaves = point_cloud_ops.array_to_point_cloud_with_normals(array_points_leaves_points, array_points_leaves_normals)    
         
     # Saves point cloud as pcd
-    point_cloud_ops.save_as_pcd(camera.saving_path + 'leaves.pcd', point_cloud_leaves)    
+    point_cloud_ops.save_as_pcd(camera.saving_path_postprocessing + 'leaves.pcd', point_cloud_leaves)    
     
     # Segmentates the leaves into clusters and colours them, returning a list with point clouds for each leaf
     leaf_data_points_list_points, leaf_data_points_list_normals = point_cloud_ops.leaves_segmentation(point_cloud_leaves, 5, 400)  
     
     # Displays each leaf point cloud
     for i in range (len(leaf_data_points_list_points)):
-        point_cloud_ops.save_as_pcd(camera.saving_path + 'leaf_' + str(i + 1) + '.pcd', point_cloud_ops.array_to_point_cloud_with_normals(leaf_data_points_list_points[i], leaf_data_points_list_normals[i]))
+        point_cloud_ops.save_as_pcd(camera.saving_path_postprocessing + 'leaf_' + str(i + 1) + '.pcd', point_cloud_ops.array_to_point_cloud_with_normals(leaf_data_points_list_points[i], leaf_data_points_list_normals[i]))
     
     # Calculates all the leaf angles
+    json_plant = {plant_ID: []}
     leaves = []
-    for i in os.listdir(camera.saving_path):
-        if os.path.isfile(os.path.join(camera.saving_path,i)) and 'leaf_' in i:
-            leaves.append(camera.saving_path + i)    
-
+    for i in os.listdir(camera.saving_path_postprocessing):
+        if os.path.isfile(os.path.join(camera.saving_path_postprocessing,i)) and 'leaf_' in i:
+            leaves.append(camera.saving_path_postprocessing + i)    
     for leaf in leaves:
-        angle_ops.calculate_leaf_angle(floor_plane_a, floor_plane_b, floor_plane_c, leaf)
-    
+        angle_using_planes, angle_using_normals = angle_ops.calculate_leaf_angle(floor_plane_a, floor_plane_b, floor_plane_c, leaf)
+        leaf_id = leaf.rsplit('/')[3][:-4]
+        leaf_data = {'leaf_id': leaf_id, 'angle_with_plane': angle_using_planes, 'angle_with_normals': angle_using_normals}
+        json_plant[plant_ID].append(leaf_data)
+        
     # Calculates execution time for the program
     end = time.time()
     print("")
@@ -73,5 +81,5 @@ def run():
     
 if __name__ ==  '__main__':
     #filename = sys.argv[1]
-    filename = "others/test/1.pcd"
+    #filename = "others/test/1.pcd"
     run()           
