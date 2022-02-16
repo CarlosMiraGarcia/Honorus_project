@@ -26,17 +26,22 @@ def append_points_to_array(npa1, npa2):
     return npa
 def crop_using_plane(list_points, floor_a, floor_b, floor_c, floor_d):
     diff_adj = 5
-    list_points_kept = []
+    list_points_kept = []                 
     
-    if floor_a * floor_b * floor_c < 0:
-        for line in list_points:
-            if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) >= - floor_d + diff_adj:
-                list_points_kept.append(line)     
+    # Keep - not sure is without this will work everytime
+    # if floor_a * floor_b * floor_c < 0:
+    #     for line in list_points:
+    #         if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) >= - floor_d + diff_adj:
+    #             list_points_kept.append(line)     
                    
-    else:
-        for line in list_points:
-            if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) <= - floor_d - diff_adj:
-                list_points_kept.append(line)        
+    # else:
+    #     for line in list_points:
+    #         if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) <= - floor_d - diff_adj:
+    #             list_points_kept.append(line)     
+                
+    for line in list_points:
+        if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) <= - floor_d - diff_adj:
+            list_points_kept.append(line)        
     return list_points_kept
 
 def leaves_segmentation(point_cloud, eps_value, min_points_value):
