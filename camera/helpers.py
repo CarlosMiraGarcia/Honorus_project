@@ -126,11 +126,11 @@ def save_point_cloud(points, normals, points_plus_normals, path, file_name):
     point_cloud.points = o3d.utility.Vector3dVector(points)  
     point_cloud.normals = o3d.utility.Vector3dVector(normals)
 
-    # Save as xyz file
-    with open(path + file_name + '.xyz', 'wb') as f:
-        numpy.savetxt(f, points_plus_normals, delimiter = ' ', newline='\n', header='', footer='', fmt='%1.3f')
+    # # Save as xyz file
+    # with open(path + file_name + '.xyz', 'wb') as f:
+    #     numpy.savetxt(f, points_plus_normals, delimiter = ' ', newline='\n', header='', footer='', fmt='%1.3f')
     
-    # Save as pcl file    
+    # Save as pcd file    
     o3d.io.write_point_cloud(path + file_name + '.pcd', point_cloud, write_ascii=True, compressed=False, print_progress=False)
 
 def compute_normals(camera_serial):
