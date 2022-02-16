@@ -34,11 +34,17 @@ def calculate_leaf_angle(floor_plane_a, floor_plane_b, floor_plane_c, filename):
             list_angle.append(calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, normal[0], normal[1], normal[2]))
     
     
-    #plane = plane_ops.create_plane(line_np_points, leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d)        
-    #array_with_plane = point_cloud_ops.append_points_to_array(line_np_points, plane)
-    #pc_with_plane = point_cloud_ops.array_to_point_cloud(array_with_plane)
-    #o3d.visualization.draw_geometries([pc_with_plane])
-    print("Using normals", statistics.mean(list_angle) - 90)
+    plane = plane_ops.create_plane(line_np_points, leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d)        
+    array_with_plane = point_cloud_ops.append_points_to_array(line_np_points, plane)
+    pc_with_plane = point_cloud_ops.array_to_point_cloud(array_with_plane)
+    point_cloud_ops.save_as_pcd(filename[:-4] + '_with_plane.pcd', pc_with_plane)    
+
+    angle_using_normals = 270 - (statistics.median(list_angle))
+    print("Using normals", angle_using_normals)
     
     # This need to be abs, so there is no negative angle
-    print("Using planes", calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, leaf_plane_a, leaf_plane_b, leaf_plane_c) - 90)
+    angle_using_planes = 90 + calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, leaf_plane_a, leaf_plane_b, leaf_plane_c)
+    if angle_using_planes > 180:
+        angle_using_planes = 360 - angle_using_planes
+    print("Using planes", angle_using_planes)
+    return angle_using_planes, angle_using_normals
