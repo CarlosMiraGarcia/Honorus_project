@@ -2,15 +2,15 @@ import numpy as np
 import open3d as o3d
 
 def get_plane(pcd, threshold, iterations):
-    """Segments a plane in the point cloud using the RANSAC algorithm."""
-    # Finds the largest plane in a point cloud
-    # where distance_treshold defines the max distance from the plane to be considered an inlier,
-    # ransac_n defines the number of points used to consider a plane,
-    # and num_iterations defines the number of times a plane is sampled
+    """Segments a plane in the point cloud using the RANSAC algorithm.\n
+    Finds the largest plane in a point cloud where:\n
+    \tdistance_treshold (threshold) defines the max distance from the plane to be considered an inlier,\n
+    \transac_n defines the number of points used to consider a plane,\n
+    \tand num_iterations (iterations) defines the number of times a plane is sampled
+    """
     plane_model, inliers = pcd.segment_plane(distance_threshold= threshold, 
                                              ransac_n=3,
-                                             num_iterations=iterations)
-    [a,b,c,d] = plane_model                                                 
+                                             num_iterations=iterations)                                        
     #inlier_cloud = pcd.select_by_index(inliers)
     #inlier_cloud.paint_uniform_color([1.0, 0, 0])
     #outlier_cloud = pcd.select_by_index(inliers, invert=True)
