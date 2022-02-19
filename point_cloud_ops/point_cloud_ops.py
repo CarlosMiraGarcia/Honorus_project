@@ -40,19 +40,8 @@ def crop_using_plane(list_points, floor_a, floor_b, floor_c, floor_d):
     """From a point cloud, crops all the data points found a given plane"""
     diff_adj = 5 # Threshold level from a given plane where data points will be removed
     list_points_kept = [] # List of data points not removed               
-    
-    # Keep - not sure is without this will work everytime
-    # if floor_a * floor_b * floor_c < 0:
-    #     for line in list_points:
-    #         if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) >= - floor_d + diff_adj:
-    #             list_points_kept.append(line)     
-                   
-    # else:
-    #     for line in list_points:
-    #         if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) <= - floor_d - diff_adj:
-    #             list_points_kept.append(line)     
-    
-    # Keeps all the data points above the plane plus threnshold level           
+
+    # Keeps all the data points above the plane plus the threnshold level           
     for line in list_points:
         if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) <= - floor_d - diff_adj:
             list_points_kept.append(line)        
