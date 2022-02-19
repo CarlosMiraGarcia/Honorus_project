@@ -1,2 +1,5 @@
 others/test
 **/__pycache__
+others/data/2022**
+others/camera_settings/calibration_28_01_22.json
+others/camera_settings/patterns_28_01_22.json
