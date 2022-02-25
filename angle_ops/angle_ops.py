@@ -28,32 +28,40 @@ def calculate_leaf_angle(floor_plane_a, floor_plane_b, floor_plane_c, filename):
        \tfloor_plane_c = c,\n
        \tand filename is the leaf point cloud file
        """
-    pc_leaf = o3d.io.read_point_cloud(filename) # Reads point cloud from file
-
+    pc_leaf = o3d.io.read_point_cloud(filename) # Reads point cloud from file  
+    
+    # Gets best fitting plane from the point cloud, returning its plane equation
+    leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d =  plane_ops.get_plane(pc_leaf, 1, 5000)      
+                
     leaf_np_points = np.asarray(pc_leaf.points) # Creates a numpy array with the points
     leaf_np_normals = np.asarray(pc_leaf.normals) # Creates a numpy array with the normals    
-    
-    # Gets the largest plane from the point cloud, returning the plane equation
-    leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d =  plane_ops.get_plane(pc_leaf, 50, 1000)
         
     # Creates a plane using the point cloud array and the plane equation    
-    plane = plane_ops.create_plane(leaf_np_points, leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d)        
+    plane = plane_ops.create_plane(leaf_np_points, leaf_plane_a, leaf_plane_b, leaf_plane_c, leaf_plane_d) 
+               
     array_with_plane = point_cloud_ops.append_points_to_array(leaf_np_points, plane) # Inserts plane to the point cloud
     pc_with_plane = point_cloud_ops.array_to_point_cloud(array_with_plane) # Converts array to point cloud class
     point_cloud_ops.save_as_pcd(filename[:-4] + '_with_plane.pcd', pc_with_plane) # Saves point cloud with inserted plane
     
+    # Calculates the angles using the plane equation
+    # Since we want the angle between the leaf plane and the zenit,
+    # 90 is added to the result to include the distance between the floor plane and the zenit
+    angle_using_planes = 90 + _calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, leaf_plane_a, leaf_plane_b, leaf_plane_c)
+    
+    # Since we don't know the direction of the leaf
+    # this fixes the cases where the leaf is facing backwards
+    if angle_using_planes > 180:
+        angle_using_planes = 360 - angle_using_planes       
+
     # Calculates the angles using the normals
     list_angle = []
     for normal in leaf_np_normals:
         list_angle.append(_calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, normal[0], normal[1], normal[2]))
-    angle_using_normals = 270 - (statistics.median(list_angle)) # 
-    
-    # Calculates the angles using the plane equation
-    angle_using_planes = 90 + _calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, leaf_plane_a, leaf_plane_b, leaf_plane_c)
-    
-    # Since we don't know the direction of the leaf
-    # this fixes the cases where two planes don't intersect
-    if angle_using_planes > 180:
-        angle_using_planes = 360 - angle_using_planes
         
+    # Recitication to calculate the angle from the zenith  
+    # 270 is the angle between the zenith and the floor plane,
+    # but substracting the angle calculated using the normal to 270, we get the angle between 
+    # the zenith and the leaf plane
+    angle_using_normals = statistics.median(list_angle)
+    
     return angle_using_planes, angle_using_normals # Returns angles calculations
