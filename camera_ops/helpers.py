@@ -6,7 +6,6 @@ import open3d as o3d
 
 def open_camera(camera_serial):
     """Opens the camera with the serial stored in camera_serial variable"""
-    print('Initializing camera...')
     cmd = NxLibCommand(CMD_OPEN) # Expecifies the execution node name
     cmd.parameters()[ITM_CAMERAS] = camera_serial # Expecfies the camera item to be opened
     try: # Tries to execute the command
@@ -14,13 +13,10 @@ def open_camera(camera_serial):
     except NxLibException as e: # If the command cannot be executed, prints the error
         print(e.get_error_text())
         print(cmd.result().as_json_meta())
-        print('If you called the getPointCloud end point recently (less than 10 seconds), wait 10 seconds and try again')
         return
-    print('Camera initialized')
 
 def close_camera():
     """Closes all opened cameras""" 
-    print('Closing camera...')
     close = NxLibCommand(CMD_CLOSE) # Expecifies the execution node name
     try: # Tries to execute the command
         close.execute(wait=False) # Not waiting for the camera to be closed. 
@@ -29,7 +25,6 @@ def close_camera():
         print(e.get_error_text())
         print(close.result().as_json_meta())
         return    
-    print('Camera closed')
 
 def set_camera_parameters(camera_serial, settings_path):
     """Updates the camera settings""" 
@@ -37,11 +32,9 @@ def set_camera_parameters(camera_serial, settings_path):
     itm = NxLibItem()
     camera_node = itm[ITM_CAMERAS][camera_serial] # Expecfies the camera item node
     camera_node << param # Loads the parameters into the camera
-    print('Settings updated')
 
 def capture_img(camera_serial):
     """Captures with the previous openend camera""" 
-    print('Capturing image...')
     capture = NxLibCommand(CMD_CAPTURE) # Expecifies the execution node name
     capture.parameters()[ITM_CAMERAS] = camera_serial # Reads the parameters for the camera
     try: # Tries to execute the command
@@ -51,7 +44,6 @@ def capture_img(camera_serial):
         print(capture.result()[ITM_ERROR_TEXT])
         print('If you called the getPointCloud end point recently (less than 10 seconds), wait 10 seconds and try again')
         return
-    print('Image captured')
 
 def rectify_raw_img():
     """Rectifies the captured images to avoid lense distortion"""
@@ -96,7 +88,6 @@ def create_path(path, file_name):
 
 def create_point_map(camera_serial):
     """Compute the point map from the disparity map"""
-    print('Creating point map...')
     point_map = NxLibCommand(CMD_COMPUTE_POINT_MAP) # Expecifies the execution node name
     try: # Tries to execute the command
         point_map.execute()
@@ -105,15 +96,13 @@ def create_point_map(camera_serial):
         print(e.get_error_text())
         print(point_map.result().as_json_meta())
         return    
-    print('Point map created')
     return points
      
 def save_point_cloud(points, normals, path, file_name):
     """Saves the point cloud to a pcd file, including the normals"""
     point_cloud = o3d.geometry.PointCloud()
     point_cloud.points = o3d.utility.Vector3dVector(points)  
-    point_cloud.normals = o3d.utility.Vector3dVector(normals)
- 
+    point_cloud.normals = o3d.utility.Vector3dVector(normals) 
     o3d.io.write_point_cloud(path + file_name + '.pcd', point_cloud, write_ascii=False, compressed=False, print_progress=False)
 
 def compute_normals(camera_serial):
