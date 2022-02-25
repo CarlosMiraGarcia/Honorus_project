@@ -1,6 +1,7 @@
 import open3d as o3d
 import numpy as np
 import matplotlib.pyplot as plt
+from point_cloud_ops import point_cloud_ops
 
 def remove_outliers(pcd, neighbors, ratio):
     """ Removes outliers from a point cloud
@@ -36,18 +37,23 @@ def append_points_to_array(nparray1, npaarray2):
     npa = np.vstack((nparray1, npaarray2))
     return npa # Returns the merged numpy array
 
-def crop_using_plane(list_points, floor_a, floor_b, floor_c, floor_d):
-    """From a point cloud, crops all the data points found a given plane"""
+def crop_using_plane(array_points, floor_a, floor_b, floor_c, floor_d):
+    """From a point cloud, crops all the data points found under a given plane"""
     diff_adj = 5 # Threshold level from a given plane where data points will be removed
     list_points_kept = [] # List of data points not removed               
 
     # Keeps all the data points above the plane plus the threnshold level           
-    for line in list_points:
-        if (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2]) <= - floor_d - diff_adj:
-            list_points_kept.append(line)        
-    return list_points_kept # Returns list with the kept data points
+    for line in array_points:
+        if -((floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2])) >= floor_d + diff_adj:
+            list_points_kept.append(line)
+            
+    array_points_kept = np.asarray(list_points_kept) 
+    array_noplane_points, array_noplane_normals = np.hsplit(array_points_kept, 2) # Splits the array into two arrays: points and normals
+    point_cloud = point_cloud_ops.array_to_point_cloud_with_normals(
+    array_noplane_points, array_noplane_normals) # Converts the numpy array to point cloud class       
+    return point_cloud # Returns list with the kept data points
 
-def leaves_segmentation(point_cloud, eps_value, min_points_value):
+def leaves_segmentation(point_cloud, eps_value, min_points_value, saving_path_postprocessing):
     """Segments a point cloud containing leaves into individual leaf clusters\n
     \tUses DBSCAN [Martin Ester, 1996]\n
     \thttp://www.open3d.org/docs/latest/tutorial/Basic/pointcloud.html
@@ -55,24 +61,18 @@ def leaves_segmentation(point_cloud, eps_value, min_points_value):
     # creates a label por each of the points depending on the cluster they are in,
     # with a -1 for whatever is considered noise
     labels = np.array(point_cloud.cluster_dbscan(eps=eps_value, min_points=min_points_value, print_progress=True)) 
-    max_label = labels.max() # Finds the number of labels
-    print(f"point cloud has {max_label + 1} clusters")
-    
-    # This is used to display the leaves using open3d with different colours
-    colors = plt.get_cmap("viridis")(labels / (max_label if max_label > 0 else 1)) # selects a colour based on the assigned label using the palette viridis
-    colors[labels < 0] = 0 # If the cluster is too small (noise), set the colour to black
-    point_cloud.colors = o3d.utility.Vector3dVector(colors[:, :3])
-    
-    print("Remember to display the leaves with different colours for the dissertation!")
-    print("This can be done on the leaves_segmentation module")  
+    total_labels = labels.max() # Finds the number of labels
+    print(f"point cloud has {total_labels + 1} clusters")
           
     pc_points = [] # List with the different point clouds points
     pc_normals = [] # List with the different point clouds normals
     
     # For each label created, this function appends the data points to each of the lists
     # where the label from each set of data points matches the current cluster label
-    for label in range (max_label + 1):
+    for label in range (total_labels + 1):
         pc_points.append(np.asarray(point_cloud.points)[labels == label])
         pc_normals.append(np.asarray(point_cloud.normals)[labels == label])            
-               
-    return pc_points, pc_normals # Returns the list with the point clouds
+         
+    # Saves each leaf into a point cloud file
+    for i in range (len(pc_points)):
+        point_cloud_ops.save_as_pcd(saving_path_postprocessing + 'leaf_' + str(i + 1) + '.pcd', point_cloud_ops.array_to_point_cloud_with_normals(pc_points[i], pc_normals[i]))
