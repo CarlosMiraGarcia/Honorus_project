@@ -40,9 +40,8 @@ def capture_img(camera_serial):
     try: # Tries to execute the command
         capture.execute()
     except NxLibException as e: # If the command cannot be executed, prints the error
-        print(e.get_error_code())
-        print(capture.result()[ITM_ERROR_TEXT])
-        print('If you called the getPointCloud end point recently (less than 10 seconds), wait 10 seconds and try again')
+        print(e.get_error_text())
+        print(capture.result().as_json_meta())
         return
 
 def rectify_raw_img():
