@@ -10,7 +10,6 @@ import datetime
 import json
 
 def run():
-    start = time.time() # Timer starts
     file_name = str(datetime.datetime.now().strftime('%Y%m%dT%H%M')).split('.')[0] # Creates a string with current time stamp
     plant_ID = file_name # Sets the plant_ID to the current time stamp string
     json_plant = {plant_ID: []} # Creates dictionary for the JSON file entry
@@ -48,7 +47,7 @@ def run():
     # Saves point cloud as pcd
     point_cloud_ops.save_as_pcd(camera.saving_path_postprocessing + 'leaves.pcd', point_cloud_leaves)    
     
-    # Segmentates the leaves into clusters, returning a list with point and normals for each leaf
+    # Segments the leaves into clusters, returning a list with point and normals for each leaf
     point_cloud_ops.leaves_segmentation(point_cloud_leaves, 5, 400, camera.saving_path_postprocessing)  
 
     # Finds all the leaves in the folder, and appends them to the list
@@ -69,9 +68,6 @@ def run():
     with open(json_file, 'w') as f:
         json_data.append(json_plant) # Appends entry to the JSON file content
         json.dump(json_data, f) # Writes the content to the JSON file
-               
-    end = time.time() # Gets current time from timer
-    print("\nExecution time:", end - start) # Prints execution time
 
 if __name__ ==  '__main__':
     run() # Runs the main script
