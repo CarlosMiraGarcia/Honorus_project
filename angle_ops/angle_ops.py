@@ -58,10 +58,7 @@ def calculate_leaf_angle(floor_plane_a, floor_plane_b, floor_plane_c, filename):
     for normal in leaf_np_normals:
         list_angle.append(_calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, normal[0], normal[1], normal[2]))
         
-    # Recitication to calculate the angle from the zenith  
-    # 270 is the angle between the zenith and the floor plane,
-    # but substracting the angle calculated using the normal to 270, we get the angle between 
-    # the zenith and the leaf plane
+    # Calculates the median from all the angles
     angle_using_normals = statistics.median(list_angle)
     
     return angle_using_planes, angle_using_normals # Returns angles calculations
