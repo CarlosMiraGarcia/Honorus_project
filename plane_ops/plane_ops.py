@@ -11,13 +11,8 @@ def get_plane(pcd, threshold, iterations):
     plane_model, inliers = pcd.segment_plane(distance_threshold= threshold, 
                                              ransac_n=3,
                                              num_iterations=iterations)                                        
-    #inlier_cloud = pcd.select_by_index(inliers)
-    #inlier_cloud.paint_uniform_color([1.0, 0, 0])
-    #outlier_cloud = pcd.select_by_index(inliers, invert=True)
-    #o3d.visualization.draw_geometries([inlier_cloud, outlier_cloud])
-    
+   
     return plane_model # Returns the plane equation for the plane
-
      
 def create_plane(point_cloud, a, b, c, d):
     """Creates a plane.\n
@@ -30,7 +25,10 @@ def create_plane(point_cloud, a, b, c, d):
         for j in  range (int(min_xyz[1]* 10), int(max_xyz[1]* 10)):
             x = i/10
             y = j/10
-            z = (-d - a*x - b*y)/c
+            if c == 0:
+                z = 0
+            else:
+                z = (-d - a*x - b*y)/c
             plane.append([x, y, z])
             
     return np.asarray(plane) # Returns a numpy array containing the created plane

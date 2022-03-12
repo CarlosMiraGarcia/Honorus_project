@@ -3,7 +3,6 @@ from angle_ops import angle_ops
 from point_cloud_ops import point_cloud_ops
 from plane_ops import plane_ops
 import open3d as o3d
-import time
 import numpy as np
 import os
 import datetime
@@ -40,14 +39,14 @@ def run():
     
     # Removes the data points under crop tray plane
     tray_plane_a, tray_plane_b, tray_plane_c, tray_plane_d = plane_ops.get_plane(point_cloud_nofloor, 0.5, 3000) # Finds the plane equation for the tray
-    point_cloud_leaves = point_cloud_ops.crop_using_plane(
-        np.asarray(np.concatenate([point_cloud_nofloor.points, point_cloud_nofloor.normals], axis= 1)), 
+    point_cloud_leaves = point_cloud_ops.crop_using_plane(np.asarray(np.concatenate(
+        [point_cloud_nofloor.points, point_cloud_nofloor.normals], axis= 1)), 
         tray_plane_a, tray_plane_b, tray_plane_c, tray_plane_d) # Crops the point cloud using the tray's plane equation
         
     # Saves point cloud as pcd
     point_cloud_ops.save_as_pcd(camera.saving_path_postprocessing + 'leaves.pcd', point_cloud_leaves)    
     
-    # Segments the leaves into clusters, returning a list with point and normals for each leaf
+    # Segments the leaves into clusters. Returns a list with points and normals for each leaf
     point_cloud_ops.leaves_segmentation(point_cloud_leaves, 5, 400, camera.saving_path_postprocessing)  
 
     # Finds all the leaves in the folder, and appends them to the list

@@ -1,7 +1,5 @@
 import open3d as o3d
 import numpy as np
-import matplotlib.pyplot as plt
-from point_cloud_ops import point_cloud_ops
 
 def remove_outliers(pcd, neighbors, ratio):
     """ Removes outliers from a point cloud
@@ -49,7 +47,7 @@ def crop_using_plane(array_points, floor_a, floor_b, floor_c, floor_d):
             
     array_points_kept = np.asarray(list_points_kept) 
     array_noplane_points, array_noplane_normals = np.hsplit(array_points_kept, 2) # Splits the array into two arrays: points and normals
-    point_cloud = point_cloud_ops.array_to_point_cloud_with_normals(
+    point_cloud = array_to_point_cloud_with_normals(
     array_noplane_points, array_noplane_normals) # Converts the numpy array to point cloud class       
     return point_cloud # Returns list with the kept data points
 
@@ -75,4 +73,4 @@ def leaves_segmentation(point_cloud, eps_value, min_points_value, saving_path_po
          
     # Saves each leaf into a point cloud file
     for i in range (len(pc_points)):
-        point_cloud_ops.save_as_pcd(saving_path_postprocessing + 'leaf_' + str(i + 1) + '.pcd', point_cloud_ops.array_to_point_cloud_with_normals(pc_points[i], pc_normals[i]))
+        save_as_pcd(saving_path_postprocessing + 'leaf_' + str(i + 1) + '.pcd', array_to_point_cloud_with_normals(pc_points[i], pc_normals[i]))
