@@ -42,6 +42,7 @@ def crop_using_plane(array_points, floor_a, floor_b, floor_c, floor_d):
 
     # Keeps all the data points above the plane plus the threnshold level           
     for line in array_points:
+        solu = (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2])
         if -((floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2])) >= floor_d + diff_adj:
             list_points_kept.append(line)
             
@@ -58,9 +59,8 @@ def leaves_segmentation(point_cloud, eps_value, min_points_value, saving_path_po
     """
     # creates a label por each of the points depending on the cluster they are in,
     # with a -1 for whatever is considered noise
-    labels = np.array(point_cloud.cluster_dbscan(eps=eps_value, min_points=min_points_value, print_progress=True)) 
+    labels = np.array(point_cloud.cluster_dbscan(eps=eps_value, min_points=min_points_value, print_progress=False)) 
     total_labels = labels.max() # Finds the number of labels
-    print(f"point cloud has {total_labels + 1} clusters")
           
     pc_points = [] # List with the different point clouds points
     pc_normals = [] # List with the different point clouds normals
