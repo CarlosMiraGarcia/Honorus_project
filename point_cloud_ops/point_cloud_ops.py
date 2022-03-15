@@ -42,7 +42,6 @@ def crop_using_plane(array_points, floor_a, floor_b, floor_c, floor_d):
 
     # Keeps all the data points above the plane plus the threnshold level           
     for line in array_points:
-        solu = (floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2])
         if -((floor_a * line[0]) + (floor_b * line[1]) + (floor_c * line[2])) >= floor_d + diff_adj:
             list_points_kept.append(line)
             
