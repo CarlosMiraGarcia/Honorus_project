@@ -44,7 +44,6 @@ def calculate_leaf_angle(floor_plane_a, floor_plane_b, floor_plane_c, filename):
     point_cloud_ops.save_as_pcd(filename[:-4] + '_with_plane.pcd', pc_with_plane) # Saves point cloud with inserted plane
     
     # Calculates the angles using the plane equation
-    # Since we want the angle between the leaf plane and the zenit,
     # 90 is added to the result to include the distance between the floor plane and the zenit
     angle_using_planes = 90 + _calculate_angles(floor_plane_a, floor_plane_b, floor_plane_c, leaf_plane_a, leaf_plane_b, leaf_plane_c)
     
