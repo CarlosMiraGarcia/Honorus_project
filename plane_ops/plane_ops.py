@@ -10,8 +10,7 @@ def get_plane(pcd, threshold, iterations):
     """
     plane_model, inliers = pcd.segment_plane(distance_threshold= threshold, 
                                              ransac_n=3,
-                                             num_iterations=iterations)                                        
-   
+                                             num_iterations=iterations)       
     return plane_model # Returns the plane equation for the plane
      
 def create_plane(point_cloud, a, b, c, d):
