@@ -1,5 +1,5 @@
 # Honours_project
-## Software Engineering final project 
+## Software Engineering - Final Project 
 ### Measuring the leaf inclination angles of basil plants with a stereo camera
 
 This projects measures the leaf inclination angles of basil plants with the use of a stereo camera. The point clouds generated 
