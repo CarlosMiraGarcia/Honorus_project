@@ -22,3 +22,5 @@ This is performed twice: one for the floor plane and another one for the grow tr
 After this, the leafs are segmented using DBSCAN.
 <br/>
 <img src="https://user-images.githubusercontent.com/72560934/159664020-3a2e0bc0-66f2-41a0-82a1-c4c5b06d909e.png" width=600px/>
+<br/><br/>
+The zenith vector is calculated using the floor plane equation, and then the leaf inclination angle is calculated between each leaf best fitted plane and the zenith vector. For the second method, the angle is calculated using the surface normals and the zenith vector.
