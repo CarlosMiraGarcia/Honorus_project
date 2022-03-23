@@ -8,6 +8,9 @@ used two methods: the best fit plane and the surface normals.
 
 In order to make this project work, an Ensesno 45 stereo camera is needed in order to capture the plants' point clouds. However, a different version of the project, where the point clouds are already taken, will be uploaded.
 
+
+
+
 First the point cloud is taken.
 
 <img src="https://user-images.githubusercontent.com/72560934/159663968-d739c3d8-50ac-4154-bba0-4793fc31e77b.png" width=600px/>
